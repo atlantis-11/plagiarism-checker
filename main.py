@@ -15,6 +15,10 @@ def main():
     check_file = args.check_file
     check_dir = args.check_dir
 
+    # On Windows, when the directory path contains spaces, it is enclosed in quotes.
+    # Backslash at the end of path escapes the closing quote, so we need to remove it.
+    check_dir = check_dir.rstrip('"')
+
     docxs_in_dir = glob.glob(f'{check_dir}/*.docx')
 
     if len(docxs_in_dir) == 0:
