@@ -20,6 +20,10 @@ class CacheManager:
     @staticmethod
     def get(file_path):
         file_hash = CacheManager.calculate_hash(file_path)
+
+        if file_hash is None:
+            return None
+
         cached_data = CacheManager.cache.get(file_hash)
         if cached_data:
             return cached_data
@@ -28,18 +32,29 @@ class CacheManager:
     @staticmethod
     def put(file_path, txt_data):
         file_hash = CacheManager.calculate_hash(file_path)
+
+        if file_hash is None:
+            raise FileNotFoundError
+
         CacheManager.cache[file_hash] = txt_data
         CacheManager.save_cache()
 
     @staticmethod
     def calculate_hash(file_path):
         file_metadata = CacheManager.get_metadata(file_path)
+
+        if file_metadata is None:
+            return None
+        
         return hashlib.md5(str(file_metadata).encode('utf-8')).hexdigest()
 
     @staticmethod
     def get_metadata(file_path):
-        return {
-            'size': os.path.getsize(file_path),
-            'modified': os.path.getmtime(file_path),
-            'created': os.path.getctime(file_path)
-        }
+        try:
+            return {
+                'size': os.path.getsize(file_path),
+                'modified': os.path.getmtime(file_path),
+                'created': os.path.getctime(file_path)
+            }
+        except FileNotFoundError:
+            return None
